@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#D9DDE3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="description" content="Gourmet burger recipes for home cooking">
+    <title>Tonight - Gourmet Burgers</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVG9uaWdodCAtIEdvdXJtZXQgQnVyZ2VycyIsInNob3J0X25hbWUiOiJUb25pZ2h0Iiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNENUFERTMiLCJ0aGVtZV9jb2xvciI6IiMzNEM3NTkiLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzE5MiIsInNpemVzIjoiMTkyeDE5MiJ9XX0=">
+    <style>
+        :root { --bg: #F2F2F7; --card: #FFFFFF; --green: #34C759; --red: #E64B32; --orange: #FF9500; --purple: #AF52DE; --yellow: #FFCC00; --text: #000000; --text-secondary: #8E8E93; --logo-bg: #D9DDE3; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #1C1C1E; --card: #2C2C2E; --text: #FFFFFF; } }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 80px; }
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--logo-bg); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease; }
+        #splash.hidden { opacity: 0; pointer-events: none; }
+        .logo-text { font-family: Georgia, serif; font-style: italic; font-size: 56px; color: #000; position: relative; }
+        .logo-q { position: absolute; right: -40px; top: -5px; }
+        .tagline { margin-top: 20px; color: #666; font-size: 16px; }
+        .header { background: var(--card); padding: 20px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 4px; }
+        .header p { color: var(--text-secondary); font-size: 16px; }
+        .search-container { padding: 16px 20px; background: var(--card); }
+        .search-box { background: var(--bg); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
+        .search-box input { flex: 1; border: none; background: transparent; font-size: 16px; outline: none; color: var(--text); }
+        .search-box input::placeholder { color: var(--text-secondary); }
+        .categories { display: flex; gap: 8px; padding: 12px 20px; overflow-x: auto; background: var(--card); -webkit-overflow-scrolling: touch; }
+        .category-pill { padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: all 0.2s; border: none; background: var(--bg); color: var(--text); }
+        .category-pill.active { color: white; }
+        .category-pill.classic.active { background: var(--red); }
+        .category-pill.veggie.active { background: var(--green); }
+        .category-pill.spicy.active { background: var(--orange); }
+        .category-pill.gourmet.active { background: var(--purple); }
+        .recipe-grid { padding: 20px; display: grid; gap: 20px; }
+        .recipe-card { background: var(--card); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s; }
+        .recipe-card:active { transform: scale(0.98); }
+        .recipe-image { width: 100%; height: 200px; object-fit: cover; background: #E0E0E0; }
+        .recipe-content { padding: 16px; position: relative; }
+        .favorite-btn { position: absolute; top: -20px; right: 16px; width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 20px; }
+        .favorite-btn.active { color: var(--red); }
+        .category-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
+        .category-badge.classic { background: #FFE5E5; color: var(--red); }
+        .category-badge.veggie { background: #E5F5E9; color: var(--green); }
+        .category-badge.spicy { background: #FFF4E5; color: var(--orange); }
+        .category-badge.gourmet { background: #F3E5F5; color: var(--purple); }
+        .recipe-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+        .recipe-desc { color: var(--text-secondary); font-size: 14px; line-height: 1.4; margin-bottom: 12px; }
+        .recipe-meta { display: flex; gap: 16px; color: var(--text-secondary); font-size: 13px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .modal.active { display: block; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header { position: relative; }
+        .modal-image { width: 100%; height: 300px; object-fit: cover; }
+        .back-btn { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); border: none; color: white; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-content { padding: 20px; }
+        .stats-bar { display: flex; justify-content: space-around; background: var(--bg); padding: 16px; border-radius: 12px; margin: 20px 0; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 18px; font-weight: 700; display: block; }
+        .stat-label { font-size: 12px; color: var(--text-secondary); }
+        .section { margin-bottom: 24px; }
+        .section-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+        .ingredient { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .ingredient-check { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        .ingredient-check.required { background: var(--green); color: white; }
+        .ingredient-check.optional { border: 2px dashed var(--text-secondary); color: var(--text-secondary); }
+        .step { display: flex; gap: 16px; margin-bottom: 16px; }
+        .step-number { width: 28px; height: 28px; border-radius: 50%; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+        .recommendation { background: var(--bg); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; gap: 16px; align-items: center; }
+        .rec-icon { font-size: 32px; }
+        .rec-title { font-weight: 600; margin-bottom: 2px; }
+        .rec-desc { font-size: 13px; color: var(--text-secondary); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 8px 0; z-index: 99; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; cursor: pointer; color: var(--text-secondary); text-decoration: none; border: none; background: transparent; font-size: 12px; }
+        .nav-item.active { color: var(--green); }
+        .nav-icon { font-size: 24px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <div id="splash">
+        <div class="logo-text">Tonight<span class="logo-q">?</span></div>
+        <p class="tagline">Gourmet burgers at home</p>
+    </div>
+    <div id="app">
+        <div class="header"><h1>Tonight</h1><p>Gourmet burgers at home</p></div>
+        <div class="search-container">
+            <div class="search-box"><span>🔍</span><input type="text" id="searchInput" placeholder="Search recipes, ingredients..."></div>
+        </div>
+        <div class="categories" id="categories">
+            <button class="category-pill active" data-category="all">All</button>
+            <button class="category-pill classic" data-category="classic">🔥 Classic Beef</button>
+            <button class="category-pill veggie" data-category="veggie">🌿 Veggie Vibes</button>
+            <button class="category-pill spicy" data-category="spicy">🌶️ Spicy Madness</button>
+            <button class="category-pill gourmet" data-category="gourmet">⭐ Gourmet Stack</button>
+        </div>
+        <div class="recipe-grid" id="recipeGrid"></div>
+    </div>
+    <div class="modal" id="recipeModal">
+        <div class="modal-header"><img class="modal-image" id="modalImage" src="" alt=""><button class="back-btn" onclick="closeModal()">←</button></div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="showScreen('home')"><span class="nav-icon">🏠</span><span>Home</span></button>
+        <button class="nav-item" onclick="showScreen('favorites')"><span class="nav-icon">♡</span><span>Favorites</span></button>
+    </nav>
+    <script>
+        const recipes = [
+            {id:'1',name:'The Classic Smash',category:'classic',categoryName:'Classic Beef',description:'Double patty, caramelized crust, American cheese, secret sauce.',prepTime:10,cookTime:8,difficulty:'Easy',image:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800',ingredients:[{name:'Ground beef (80/20)',amount:'8 oz',optional:false},{name:'American cheese',amount:'2 slices',optional:false},{name:'Brioche bun',amount:'1',optional:false},{name:'Pickles',amount:'4 slices',optional:false},{name:'Onion',amount:'1/4 sliced thin',optional:true}],steps:['Roll beef into 4oz balls, season generously with salt.','Heat cast iron skillet until smoking hot.','Place balls in pan, smash flat immediately with spatula.','Cook 2 mins until crust forms, flip, add cheese.','Toast bun in beef fat, assemble with sauce and pickles.'],recommendations:[{icon:'🍟',title:'Truffle Fries',desc:'Hand-cut potatoes with truffle oil'},{icon:'🍺',title:'Craft Lager',desc:'A crisp pilsner cuts through the richness'},{icon:'🥤',title:'Vanilla Shake',desc:'Classic diner-style thick shake'}]},
+            {id:'2',name:'Umami Mushroom',category:'veggie',categoryName:'Veggie Vibes',description:'Portobello cap marinated in soy and garlic, topped with goat cheese.',prepTime:15,cookTime:12,difficulty:'Medium',image:'https://images.unsplash.com/photo-1520072959219-c595dc870360?w=800',ingredients:[{name:'Portobello mushroom caps',amount:'2 large',optional:false},{name:'Soy sauce',amount:'3 tbsp',optional:false},{name:'Goat cheese',amount:'2 oz',optional:false},{name:'Arugula',amount:'1 cup',optional:false},{name:'Ciabatta roll',amount:'1',optional:false}],steps:['Whisk soy sauce, garlic, and olive oil for marinade.','Marinate mushrooms 10 minutes, reserving liquid.','Grill mushrooms 5-6 mins per side, basting with marinade.','Toast ciabatta, spread goat cheese on bottom half.','Layer arugula, mushroom, and top bun.'],recommendations:[{icon:'🍠',title:'Sweet Potato Fries',desc:'Baked with rosemary and sea salt'},{icon:'🍷',title:'Pinot Noir',desc:'Earthy wine complements the mushrooms'},{icon:'🥗',title:'Side Salad',desc:'Lemon vinaigrette with shaved parmesan'}]},
+            {id:'3',name:'Nashville Hot',category:'spicy',categoryName:'Spicy Madness',description:'Crispy chicken thigh tossed in cayenne oil, pickles, white bread.',prepTime:20,cookTime:15,difficulty:'Medium',image:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=800',ingredients:[{name:'Chicken thighs',amount:'2 boneless',optional:false},{name:'Buttermilk',amount:'1 cup',optional:false},{name:'Cayenne pepper',amount:'2 tbsp',optional:false},{name:'Brown sugar',amount:'1 tbsp',optional:false},{name:'White bread',amount:'2 slices',optional:false}],steps:['Marinate chicken in buttermilk overnight (or 2 hours min).','Dredge in seasoned flour mixed with spices.','Fry at 350°F for 6-8 minutes until golden.','Toss hot chicken in spicy oil mixture immediately.','Serve on white bread with pickles.'],recommendations:[{icon:'🥗',title:'Coleslaw',desc:'Creamy cabbage cuts the spice'},{icon:'🍺',title:'Milk Stout',desc:'Sweet beer balances the heat'},{icon:'🥧',title:'Peach Cobbler',desc:'Sweet finish to cool your palate'}]}
+        ];
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let currentScreen = 'home';
+        window.addEventListener('load', () => { setTimeout(() => { document.getElementById('splash').classList.add('hidden'); }, 1500); renderRecipes(); setupEventListeners(); });
+        function renderRecipes(category = 'all', search = '') {
+            const grid = document.getElementById('recipeGrid');
+            let filtered = recipes;
+            if (category !== 'all') { filtered = filtered.filter(r => r.category === category); }
+            if (search) { filtered = filtered.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.ingredients.some(i => i.name.toLowerCase().includes(search.toLowerCase()))); }
+            if (currentScreen === 'favorites') { filtered = filtered.filter(r => favorites.includes(r.id)); }
+            if (filtered.length === 0 && currentScreen === 'favorites') { grid.innerHTML = '<div class="empty-state"><div class="empty-icon">♡</div><h3>No favorites yet</h3><p>Heart your favorite burgers<br>to save them here</p></div>'; return; }
+            grid.innerHTML = filtered.map(recipe => `<div class="recipe-card" onclick="openRecipe('${recipe.id}')"><img class="recipe-image" src="${recipe.image}" alt="${recipe.name}" loading="lazy"><div class="recipe-content"><button class="favorite-btn ${favorites.includes(recipe.id) ? 'active' : ''}" onclick="event.stopPropagation(); toggleFavorite('${recipe.id}')">${favorites.includes(recipe.id) ? '♥' : '♡'}</button><span class="category-badge ${recipe.category}">${recipe.categoryName}</span><h3 class="recipe-title">${recipe.name}</h3><p class="recipe-desc">${recipe.description}</p><div class="recipe-meta"><span>⏱ ${recipe.prepTime + recipe.cookTime}m</span><span>🔥 ${recipe.categoryName}</span></div></div></div>`).join('');
+        }
+        function openRecipe(id) {
+            const recipe = recipes.find(r => r.id === id);
+            if (!recipe) return;
+            document.getElementById('modalImage').src = recipe.image;
+            document.getElementById('modalContent').innerHTML = `<span class="category-badge ${recipe.category}">${recipe.categoryName}</span><h2 style="font-size: 28px; margin: 8px 0;">${recipe.name}</h2><p style="color: var(--text-secondary); margin-bottom: 20px;">${recipe.description}</p><div class="stats-bar"><div class="stat"><span class="stat-value">⏱</span><span class="stat-value">${recipe.prepTime}m</span><span class="stat-label">Prep</span></div><div class="stat"><span class="stat-value">🔥</span><span class="stat-value">${recipe.cookTime}m</span><span class="stat-label">Cook</span></div><div class="stat"><span class="stat-value">⏳</span><span class="stat-value">${recipe.prepTime + recipe.cookTime}m</span><span class="stat-label">Total</span></div><div class="stat"><span class="stat-value">📊</span><span class="stat-value" style="color: ${recipe.difficulty === 'Easy' ? 'var(--green)' : recipe.difficulty === 'Medium' ? 'var(--yellow)' : 'var(--red)'}">${recipe.difficulty}</span><span class="stat-label">Level</span></div></div><div class="section"><h3 class="section-title">Ingredients</h3>${recipe.ingredients.map(ing => `<div class="ingredient"><span class="ingredient-check ${ing.optional ? 'optional' : 'required'}">${ing.optional ? '○' : '✓'}</span><div><div>${ing.name}</div><div style="color: var(--text-secondary); font-size: 13px;">${ing.amount}</div></div>${ing.optional ? '<span style="margin-left: auto; font-size: 12px; color: var(--text-secondary); background: var(--bg); padding: 2px 8px; border-radius: 4px;">Optional</span>' : ''}</div>`).join('')}</div><div class="section"><h3 class="section-title">Instructions</h3>${recipe.steps.map((step, i) => `<div class="step"><span class="step-number">${i + 1}</span><p>${step}</p></div>`).join('')}</div><div class="section"><h3 class="section-title">Perfect Pairings</h3>${recipe.recommendations.map(rec => `<div class="recommendation"><span class="rec-icon">${rec.icon}</span><div><div class="rec-title">${rec.title}</div><div class="rec-desc">${rec.desc}</div></div></div>`).join('')}</div>`;
+            document.getElementById('recipeModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() { document.getElementById('recipeModal').classList.remove('active'); document.body.style.overflow = ''; }
+        function toggleFavorite(id) { if (favorites.includes(id)) { favorites = favorites.filter(f => f !== id); } else { favorites.push(id); } localStorage.setItem('favorites', JSON.stringify(favorites)); renderRecipes(); }
+        function showScreen(screen) { currentScreen = screen; document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active'); renderRecipes(); }
+        function setupEventListeners() {
+            document.querySelectorAll('.category-pill').forEach(pill => { pill.addEventListener('click', () => { document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); pill.classList.add('active'); renderRecipes(pill.dataset.category, document.getElementById('searchInput').value); }); });
+            document.getElementById('searchInput').addEventListener('input', (e) => { const activeCategory = document.querySelector('.category-pill.active').dataset.category; renderRecipes(activeCategory, e.target.value); });
+        }
+    </script>
+</body>
+</html>
