@@ -1,0 +1,22 @@
+{
+  "name": "tonight-app",
+  "version": "1.0.0",
+  "description": "Tonight App - Android and iOS mobile application",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8000",
+    "sync": "npx cap sync",
+    "build:android": "npx cap build android",
+    "build:ios": "npx cap build ios"
+  },
+  "keywords": ["mobile", "app"],
+  "author": "VONTEGGA",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/android": "^8.2.0",
+    "@capacitor/ios": "^8.2.0"
+  },
+  "dependencies": {}
+}
