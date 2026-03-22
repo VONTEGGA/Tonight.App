@@ -3,85 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gourmet Burger App</title>
+    <title>Gourmet Burger Recipe App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+            color: #333;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        /* Add additional styles */
+        /* Style for modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+    </style>
 </head>
 <body>
-    <h1>Gourmet Burger Recipes</h1>
-    <h2>Classic Recipes</h2>
-    <h3>1. Classic Beef Burger</h3>
-    <p>Ingredients: Ground beef, salt, pepper...</p>
-    <p>Cooking Instructions: Grill for 6-7 minutes... </p>
-    <p>Prep/Cook Time: 30 mins</p>
-    <p>Difficulty Level: Easy</p>
-    <p>Food Pairing: Fries, Cola</p>
+    <h1>Gourmet Burger Recipe App</h1>
+    <input type="text" id="search" placeholder="Search recipes...">
+    <select id="category">
+        <option value="all">All</option>
+        <option value="chicken">Chicken</option>
+        <!-- Add additional categories -->
+    </select>
+    <button id="darkModeToggle">Toggle Dark Mode</button>
+    <div id="recipes"></div>
 
-    <h3>2. Cheese Stuffed Burger</h3>
-    <p>Ingredients: Ground beef, cheese, salt...</p>
-    <p>Cooking Instructions: Grill for 7-8 minutes...</p>
-    <p>Prep/Cook Time: 35 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Onion rings, Beer</p>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modalTitle"></h2>
+            <p id="modalIngredients"></p>
+            <p id="modalInstructions"></p>
+            <p><strong>Food Pairings:</strong> <span id="modalPairings"></span></p>
+        </div>
+    </div>
 
-    <h3>3. Chicken Burger</h3>
-    <p>Ingredients: Ground chicken, spices...</p>
-    <p>Cooking Instructions: Cook for 5-6 minutes...</p>
-    <p>Prep/Cook Time: 25 mins</p>
-    <p>Difficulty Level: Easy</p>
-    <p>Food Pairing: Salad, Iced Tea</p>
+    <script>
+        const recipes = [
+            { 
+                name: 'The Classic Smash',
+                ingredients: 'Beef, Cheese, Pickles, Onions, Special Sauce',
+                instructions: 'Smash the patty and grill until crispy.',
+                pairings: 'Fries, Coleslaw'
+            },
+            { 
+                name: 'Umami Mushroom',
+                ingredients: 'Mushrooms, Swiss Cheese, Lettuce, Tomato',
+                instructions: 'Saute mushrooms and grill with Swiss cheese.',
+                pairings: 'Side Salad, Wine'
+            },
+            { 
+                name: 'Nashville Hot',
+                ingredients: 'Chicken, Hot Sauce, Pickles',
+                instructions: 'Fry chicken and coat in hot sauce.',
+                pairings: 'Pickle Chips'
+            },
+            { 
+                name: 'Truffle Wagyu',
+                ingredients: 'Wagyu Beef, Truffle Aioli, Arugula',
+                instructions: 'Grill wagyu and assemble with aioli and arugula.',
+                pairings: 'Truffle Fries'
+            },
+            { 
+                name: 'Classic Beef Burger Patty',
+                ingredients: 'Ground Beef, Salt, Pepper',
+                instructions: 'Form and grill patties to desired doneness.',
+                pairings: 'Potato Wedges'
+            },
+            { 
+                name: 'Cheese Stuffed Burger Patty',
+                ingredients: 'Ground Beef, Cheese',
+                instructions: 'Stuff cheese into patty, grill until melted.',
+                pairings: 'Sweet Potato Fries'
+            },
+            { 
+                name: 'Chicken Burger Patty',
+                ingredients: 'Ground Chicken, Spices',
+                instructions: 'Mix spices and form into patties.',
+                pairings: 'Caesar Salad'
+            },
+            { 
+                name: 'Spicy Jalapeño Burger Patty',
+                ingredients: 'Beef, Jalapeños, Pepper Jack Cheese',
+                instructions: 'Mix jalapeños into ground beef and grill.',
+                pairings: 'Onion Rings'
+            },
+            { 
+                name: 'Turkey Burger Patty',
+                ingredients: 'Ground Turkey, Herbs',
+                instructions: 'Form patties and grill until cooked through.',
+                pairings: 'Grilled Vegetables'
+            },
+            { 
+                name: 'Veggie Burger Patty',
+                ingredients: 'Mixed Vegetables, Beans, Spices',
+                instructions: 'Mash ingredients and form into patties.',
+                pairings: 'Quinoa Salad'
+            },
+            { 
+                name: 'Spicy Chicken Sandwich with Creamy Sauce',
+                ingredients: 'Chicken, Creamy Sauce, Lettuce',
+                instructions: 'Fry chicken and drizzle with creamy sauce.',
+                pairings: 'Chips'
+            },
+            { 
+                name: 'Cajun Chicken Burger',
+                ingredients: 'Chicken, Cajun Spice, Lettuce',
+                instructions: 'Season chicken with Cajun spices and grill.',
+                pairings: 'Corn on the Cob'
+            },
+            { 
+                name: 'Chipotle Cheddar Chicken Burger',
+                ingredients: 'Chicken, Chipotle Sauce, Cheddar',
+                instructions: 'Grill chicken and top with chipotle sauce.',
+                pairings: 'Guacamole'
+            },
+            { 
+                name: 'Garlic Parmesan Chicken Burger',
+                ingredients: 'Chicken, Garlic, Parmesan',
+                instructions: 'Grill chicken topped with garlic and Parmesan.',
+                pairings: 'Pasta Salad'
+            },
+        ];
 
-    <h3>4. Spicy Jalapeño Burger</h3>
-    <p>Ingredients: Ground beef, jalapeños...</p>
-    <p>Cooking Instructions: Grill for 6-7 minutes...</p>
-    <p>Prep/Cook Time: 30 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Beer, Chips</p>
+        function displayRecipes() {
+            const recipeDiv = document.getElementById('recipes');
+            recipeDiv.innerHTML = '';
+            const searchValue = document.getElementById('search').value.toLowerCase();
+            const selectedCategory = document.getElementById('category').value;
+            const filteredRecipes = recipes.filter(recipe => {
+                return (selectedCategory === 'all' || recipe.category === selectedCategory) &&
+                       recipe.name.toLowerCase().includes(searchValue);
+            });
 
-    <h2>New Recipes</h2>
-    <h3>5. Turkey Burger</h3>
-    <p>Ingredients: Ground turkey, herbs...</p>
-    <p>Cooking Instructions: Cook for 5-6 minutes...</p>
-    <p>Prep/Cook Time: 25 mins</p>
-    <p>Difficulty Level: Easy</p>
-    <p>Food Pairing: Veggies, Lemonade</p>
+            filteredRecipes.forEach(recipe => {
+                const recipeElement = document.createElement('div');
+                recipeElement.innerHTML = `${recipe.name} <button onclick='openModal(${JSON.stringify(recipe)})'>View Recipe</button>`;
+                recipeDiv.appendChild(recipeElement);
+            });
+        }
 
-    <h3>6. Veggie Burger</h3>
-    <p>Ingredients: Mixed vegetables, beans...</p>
-    <p>Cooking Instructions: Grill for 4-5 minutes...</p>
-    <p>Prep/Cook Time: 20 mins</p>
-    <p>Difficulty Level: Easy</p>
-    <p>Food Pairing: Salad, Water</p>
+        function openModal(recipe) {
+            document.getElementById('modalTitle').innerText = recipe.name;
+            document.getElementById('modalIngredients').innerText = recipe.ingredients;
+            document.getElementById('modalInstructions').innerText = recipe.instructions;
+            document.getElementById('modalPairings').innerText = recipe.pairings;
+            document.getElementById('myModal').style.display = 'block';
+        }
 
-    <h3>Gourmet Chicken Burgers</h3>
-    <h3>7. Spicy Chicken Sandwich</h3>
-    <p>Ingredients: Chicken breast, spices...</p>
-    <p>Cooking Instructions: Cook for 6-7 minutes...</p>
-    <p>Prep/Cook Time: 30 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Fries, Soft Drink</p>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+        }
 
-    <h3>8. Cajun Chicken Burger</h3>
-    <p>Ingredients: Chicken, Cajun spices...</p>
-    <p>Cooking Instructions: Grill for 7-8 minutes...</p>
-    <p>Prep/Cook Time: 35 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Coleslaw, Lemonade</p>
+        document.getElementById('darkModeToggle').onclick = toggleDarkMode;
+        document.getElementById('search').oninput = displayRecipes;
+        document.getElementById('category').onchange = displayRecipes;
 
-    <h3>9. Chipotle Cheddar Chicken Burger</h3>
-    <p>Ingredients: Chicken, chipotle, cheddar...</p>
-    <p>Cooking Instructions: Cook for 7-8 minutes...</p>
-    <p>Prep/Cook Time: 30 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Nachos, Soda</p>
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('myModal')) {
+                document.getElementById('myModal').style.display = 'none';
+            }
+        };
 
-    <h3>10. Garlic Parmesan Chicken Burger</h3>
-    <p>Ingredients: Chicken, garlic, parmesan...</p>
-    <p>Cooking Instructions: Cook for 8-9 minutes...</p>
-    <p>Prep/Cook Time: 35 mins</p>
-    <p>Difficulty Level: Medium</p>
-    <p>Food Pairing: Pasta, Red Wine</p>
+        document.getElementsByClassName('close')[0].onclick = function() {
+            document.getElementById('myModal').style.display = 'none';
+        };
 
-    <h2>Filters</h2>
-    <button onclick="filterByCategory('Chicken')">Chicken</button>
-    ...
+        displayRecipes();
+    </script>
 </body>
 </html>
